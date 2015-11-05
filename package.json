@@ -1,9 +1,9 @@
 {
-  "name": "COMP2068-Week8",
-  "version": "0.0.0",
+  "name": "comp2068-week8",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node server.js"
   },
   "dependencies": {
     "body-parser": "~1.13.2",
