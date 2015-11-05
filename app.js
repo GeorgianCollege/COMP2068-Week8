@@ -19,10 +19,13 @@ mongoose.connection.on('error', function() {
   console.error('MongoDB Connection Failed..');
 });
 
+// Route Alias
 var routes = require('./routes/index');
 var users = require('./routes/users');
 
 var app = express();
+
+require('./config/passport')(passport);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
