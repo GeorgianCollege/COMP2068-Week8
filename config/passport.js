@@ -1,18 +1,19 @@
-// define our local strategy
+// add a reference to the passport strategy
 var LocalStrategy = require('passport-local').Strategy;
 
 // import the User Model
 var User = require('../models/user');
 
-// pass in reference to passport from app.js
 module.exports = function(passport) {
+	
+	// SETUP for Session Storage and Retrieval
 	
 	//serialize user
 	passport.serializeUser(function(user, done) {
 		done(null, user);
 	});
 	
-	//deserialize user
+	//deserialze user
 	passport.deserializeUser(function(id, done) {
 		User.findById(id, function(err, user) {
 			done(err, user);
@@ -20,55 +21,55 @@ module.exports = function(passport) {
 	});
 	
 	passport.use('local-login', new LocalStrategy({
-		passReqToCallback:true
-	},
-	function(req, username, password, done) {
-		
-		//asynchronous process
-		process.nextTick(function() {
-			User.findOne({
-				'username': username
-			}), function(err, user) {
-				if(err) {
-					return done(err);
-				}
-				
-				// if no valid username is found
-				if(!user) {
-					return done(null, false, req.flash('loginMessage','Incorrect Username'));
-				}
-				
-				// if no valid password is entered
-				if(!user.validPassword(password)) {
-					return done(null, false, req.flash('loginMessage','Incorrect Password'));
-				}
-				
-				// everything is ok - proceed with login
-				return done(null, user);
-			}
-		});
-	}));
-	
-	//Configure registration local strategy
-	passport.use('local-registration', new LocalStrategy({
 		passReqToCallback: true
 	},
 	function(req, username, password, done) {
 		
+		// asynchronous process
+		process.nextTick(function() {
+			User.findOne({
+				'username':username
+			}, function(err, user) {
+				if(err) {
+					return done(err);
+				}
+				
+				//no valid user found
+				if(!user) {
+					return done(null, false, req.flash('loginMessage', 'Incorrect Username'));
+				}
+				
+				//no valid password entered
+				if(!user.validPassword(password)) {
+					return done(null, false, req.flash('loginMessage', 'Incorrect Password'));
+				}
+				
+				//everything is ok - proceed with login
+				return done(null, user);
+			});
+		});
+	}));
+	
+	// Configure registration local strategy
+	passport.use('local-registration', new LocalStrategy({
+		passReqToCallback: true
+	},
+	
+	function(req, username, password, done) {
+		
 		//asynchronous process
-		process.nextTick(function(){
-			//if the user is not already logged in:
+		process.nextTick(function() {
+			// if the user is not already logged in
 			if(!req.user) {
 				User.findOne({'username': username},
-				//if any weird errors
 				function(err, user) {
+					//if any weird errors
 					if(err) {
 						return done(err);
 					}
-					
-					// check if username is already taken
+					//check if username is already in use
 					if(user) {
-						return done(null, false, req.flash('registerMessage','The username is already in use.'));
+						return done(null, false, req.flash('registerMessage', 'The username is already taken'));
 					}
 					else {
 						// create the user
@@ -86,9 +87,10 @@ module.exports = function(passport) {
 					}
 				});
 			} else {
-				// everything is ok - user is registered
+				// everything ok, register the user
 				return done(null, req.user);
 			}
 		});
 	}));
+	
 }
